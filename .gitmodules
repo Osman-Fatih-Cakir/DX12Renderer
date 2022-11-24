@@ -6,3 +6,7 @@
 	path = Dependency/CrossWindow-Graphics
 	url = https://github.com/alaingalvan/CrossWindow-Graphics.git
 	branch = master
+[submodule "Dependency/D3D12MemoryAllocator"]
+	path = Dependency/D3D12MemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator.git
+	branch = master

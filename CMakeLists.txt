@@ -27,3 +27,7 @@ target_link_libraries(
     CrossWindowGraphics
 )
 target_include_directories(DX12Renderer PUBLIC "${CMAKE_SOURCE_DIR}/Dependency/CrossWindow-Graphics/src")
+
+add_subdirectory(Dependency/D3D12MemoryAllocator)
+target_link_libraries(DX12Renderer D3D12MemoryAllocator)
+target_include_directories(DX12Renderer PUBLIC "${CMAKE_SOURCE_DIR}/Dependency/D3D12MemoryAllocator/include")

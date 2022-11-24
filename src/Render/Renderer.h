@@ -19,12 +19,12 @@ namespace WoohooDX12
 
   // TODO Use MVP matrix (calculate matrix on CPU instead of every vertex)
   // Uniform data
-  struct
+  struct uboVS
   {
     Mat projectionMatrix;
     Mat viewMatrix;
     Mat modelMatrix;
-  } uboVS;
+  };
 
   class Renderer
   {
@@ -69,6 +69,7 @@ namespace WoohooDX12
 
     std::chrono::time_point<std::chrono::steady_clock> m_timeStart, m_timeEnd;
     float m_elapsedTime = 0.0f;
+    static uboVS m_ubo;
 
     // Graphics API structures
     IDXGIFactory4* m_factory = nullptr;

@@ -1,0 +1,6 @@
+[submodule "Dependency/crosswindow"]
+	path = Dependency/crosswindow
+	url = https://github.com/alaingalvan/crosswindow.git
+[submodule "Dependency/crosswindow-graphics"]
+	path = Dependency/crosswindow-graphics
+	url = https://github.com/alaingalvan/crosswindow-graphics.git

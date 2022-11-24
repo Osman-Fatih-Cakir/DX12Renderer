@@ -4,6 +4,22 @@
 
 extern bool g_windowShouldClose;
 
+#include <windows.h>
+#include <memory>
+
+bool g_windowShouldClose = false;
+
+void WINAPI xmain(int argc, const char** argv)
+{
+  while (!g_windowShouldClose)
+  {
+    WoohooDX12::Main main;
+    main.Init();
+    main.Run();
+  }
+}
+
+
 namespace WoohooDX12
 {
   Main::Main()

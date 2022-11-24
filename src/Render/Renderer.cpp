@@ -13,11 +13,12 @@ namespace fs = std::filesystem;
 
 namespace WoohooDX12
 {
+  uboVS Renderer::m_ubo = {};
   Renderer::Renderer(AppWindow* window)
   {
-    MakeIdentity(uboVS.projectionMatrix);
-    MakeIdentity(uboVS.viewMatrix);
-    MakeIdentity(uboVS.modelMatrix);
+    MakeIdentity(m_ubo.projectionMatrix);
+    MakeIdentity(m_ubo.viewMatrix);
+    MakeIdentity(m_ubo.modelMatrix);
 
     // Assign default values
     for (size_t i = 0; i < m_backbufferCount; ++i)
@@ -98,14 +99,14 @@ namespace WoohooDX12
       m_elapsedTime += 0.001f * time;
       m_elapsedTime = fmodf(m_elapsedTime, 6.283185307179586f);
 
-      uboVS.modelMatrix *= DirectX::XMMatrixRotationAxis(DirectX::XMLoadFloat3(&UpVector), DirectX::XMConvertToRadians(1.0f));
+      m_ubo.modelMatrix *= DirectX::XMMatrixRotationAxis(DirectX::XMLoadFloat3(&UpVector), DirectX::XMConvertToRadians(1.0f));
 
       D3D12_RANGE readRange = {};
       readRange.Begin = 0;
       readRange.End = 0;
 
       ThrowIfFailed(m_uniformBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedUniformBuffer)));
-      memcpy(m_mappedUniformBuffer, &uboVS, sizeof(uboVS));
+      memcpy(m_mappedUniformBuffer, &m_ubo, sizeof(uboVS));
       m_uniformBuffer->Unmap(0, &readRange);
     }
 
@@ -336,7 +337,7 @@ namespace WoohooDX12
         readRange.End = 0;
 
         ThrowIfFailed(m_uniformBuffer->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedUniformBuffer)));
-        memcpy(m_mappedUniformBuffer, &uboVS, sizeof(uboVS));
+        memcpy(m_mappedUniformBuffer, &m_ubo, sizeof(uboVS));
         m_uniformBuffer->Unmap(0, &readRange);
       }
 
@@ -660,11 +661,11 @@ namespace WoohooDX12
     UINT compileFlags = 0;
 #endif
 
-    std::wstring vertCompiledPath = GetShaderPath() + L"triangle.vert.dxbc";
-    std::wstring fragCompiledPath = GetShaderPath() + L"triangle.frag.dxbc";
+    std::wstring vertCompiledPath = GetShaderPath(true) + L"triangle.vert.dxbc";
+    std::wstring fragCompiledPath = GetShaderPath(true) + L"triangle.frag.dxbc";
 
-    std::wstring vertPath = GetShaderPath() + L"triangle.vert.hlsl";
-    std::wstring fragPath = GetShaderPath() + L"triangle.frag.hlsl";
+    std::wstring vertPath = GetShaderPath(false) + L"triangle.vert.hlsl";
+    std::wstring fragPath = GetShaderPath(false) + L"triangle.frag.hlsl";
 
     try
     {
@@ -710,10 +711,10 @@ namespace WoohooDX12
     m_viewport.MaxDepth = 1000.f;
 
     // Update matrices
-    uboVS.projectionMatrix = DirectX::XMMatrixPerspectiveLH(1.0f, 1.0f, 0.1f, 1000.0f);
+    m_ubo.projectionMatrix = DirectX::XMMatrixPerspectiveLH(1.0f, 1.0f, 0.1f, 1000.0f);
 
     const Vec3 camPos = Vec3(0.0f, 0.0f, 2.0f);
-    uboVS.viewMatrix = DirectX::XMMatrixLookAtLH(XMLoadFloat3(&camPos), XMLoadFloat3(&ZeroVector), XMLoadFloat3(&UpVector));
+    m_ubo.viewMatrix = DirectX::XMMatrixLookAtLH(XMLoadFloat3(&camPos), XMLoadFloat3(&ZeroVector), XMLoadFloat3(&UpVector));
 
     if (m_swapchain != nullptr)
     {

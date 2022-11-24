@@ -49,7 +49,7 @@ inline std::wstring GetWorkspacePath()
   return fs::current_path().wstring() + L"\\..\\Workspace\\";
 }
 
-inline std::wstring GetShaderPath()
+inline std::wstring GetShaderPath(bool isBinary)
 {
-  return GetWorkspacePath() + L"Shaders\\";
+  return GetWorkspacePath() + L"Shaders\\" + (isBinary ? (L"DXBC\\") : (L"HLSL\\"));
 }

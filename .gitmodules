@@ -1,0 +1,8 @@
+[submodule "Dependency/CrossWindow"]
+	path = Dependency/CrossWindow
+	url = https://github.com/alaingalvan/CrossWindow.git
+	branch = master
+[submodule "Dependency/CrossWindow-Graphics"]
+	path = Dependency/CrossWindow-Graphics
+	url = https://github.com/alaingalvan/CrossWindow-Graphics.git
+	branch = master

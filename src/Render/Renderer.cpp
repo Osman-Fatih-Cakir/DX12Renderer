@@ -7,6 +7,7 @@
 #include "RendererUtils.h"
 #include "CrossWindow/Graphics.h"
 #include "../Math.h"
+#include "D3D12MemAlloc.h"
 
 
 namespace fs = std::filesystem;

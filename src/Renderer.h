@@ -5,9 +5,9 @@
 #include <dxgi1_4.h>
 #include <d3dcompiler.h>
 #include <chrono>
-#include "../Utils.h"
-#include "../AppWindow.h"
-#include "../Types.h"
+#include "Utils.h"
+#include "AppWindow.h"
+#include "Types.h"
 
 namespace WoohooDX12
 {

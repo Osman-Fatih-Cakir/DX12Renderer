@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AppWindow.h"
-#include "Render/Renderer.h"
+#include "Renderer.h"
 
 namespace WoohooDX12
 {

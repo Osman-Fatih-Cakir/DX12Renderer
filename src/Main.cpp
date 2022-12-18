@@ -26,6 +26,8 @@ namespace WoohooDX12
   {
     m_window = new AppWindow();
     m_renderer = new Renderer(m_window);
+
+    system(" "); // Get the ascii color codes to work
   }
 
   Main::~Main()

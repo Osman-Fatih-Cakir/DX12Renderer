@@ -4,7 +4,7 @@
 
 namespace WoohooDX12
 {
-  class Buffer
+  class UploadBuffer
   {
   public:
     void Create(ID3D12Device* device, UINT width, UINT height, const char* name);
@@ -12,7 +12,7 @@ namespace WoohooDX12
 
     void AllocBuffer(void* bufferData, UINT size);
   public:
-    ID3D12Resource* m_resource = nullptr;
+    ID3D12Resource* m_buffer = nullptr;
     char* m_data = nullptr;
   };
 }

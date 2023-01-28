@@ -8,6 +8,7 @@
 #include "Utils.h"
 #include "AppWindow.h"
 #include "Types.h"
+#include "Buffer.h"
 
 namespace WoohooDX12
 {
@@ -69,7 +70,7 @@ namespace WoohooDX12
 
     std::chrono::time_point<std::chrono::steady_clock> m_timeStart, m_timeEnd;
     float m_elapsedTime = 0.0f;
-    static uboVS m_ubo;
+    uboVS m_ubo;
 
     // Graphics API structures
     IDXGIFactory4* m_factory = nullptr;
@@ -97,10 +98,10 @@ namespace WoohooDX12
     D3D12_VIEWPORT m_viewport;
     D3D12_RECT m_surfaceSize;
 
-    ID3D12Resource* m_vertexBuffer = nullptr;
-    ID3D12Resource* m_indexBuffer = nullptr;
+    UploadBuffer* m_vertexBuffer = nullptr;
+    UploadBuffer* m_indexBuffer = nullptr;
 
-    ID3D12Resource* m_uniformBuffer = nullptr;
+    UploadBuffer* m_uniformBuffer = nullptr;
     ID3D12DescriptorHeap* m_uniformBufferHeap = nullptr;
     UINT8* m_mappedUniformBuffer = nullptr;
 

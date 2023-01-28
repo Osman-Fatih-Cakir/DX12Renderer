@@ -3,7 +3,7 @@
 
 namespace WoohooDX12
 {
-  void Buffer::Create(ID3D12Device* device, UINT width, UINT height, const char* name)
+  void UploadBuffer::Create(ID3D12Device* device, UINT width, UINT height, const char* name)
   {
     D3D12_HEAP_PROPERTIES heapProps = {};
     heapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -12,38 +12,47 @@ namespace WoohooDX12
     heapProps.CreationNodeMask = 1;
     heapProps.VisibleNodeMask = 1;
 
-    D3D12_RESOURCE_DESC vertexBufferResourceDesc = {};
-    vertexBufferResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    vertexBufferResourceDesc.Alignment = 0;
-    vertexBufferResourceDesc.Width = width;
-    vertexBufferResourceDesc.Height = height;
-    vertexBufferResourceDesc.DepthOrArraySize = 1;
-    vertexBufferResourceDesc.MipLevels = 1;
-    vertexBufferResourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-    vertexBufferResourceDesc.SampleDesc.Count = 1;
-    vertexBufferResourceDesc.SampleDesc.Quality = 0;
-    vertexBufferResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-    vertexBufferResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+    D3D12_RESOURCE_DESC bufferResourceDesc = {};
+    bufferResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    bufferResourceDesc.Alignment = 0;
+    bufferResourceDesc.Width = width;
+    bufferResourceDesc.Height = height;
+    bufferResourceDesc.DepthOrArraySize = 1;
+    bufferResourceDesc.MipLevels = 1;
+    bufferResourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+    bufferResourceDesc.SampleDesc.Count = 1;
+    bufferResourceDesc.SampleDesc.Quality = 0;
+    bufferResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    bufferResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-    ThrowIfFailed(device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &vertexBufferResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_resource)));
+    ThrowIfFailed(device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &bufferResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&m_buffer)));
 
-    SetName(m_resource, "%s", name);
+    SetName(m_buffer, "%s", name);
 
-    m_resource->Map(0, NULL, reinterpret_cast<void**>(&m_data));
+    // We do not intend to read from this resource on the CPU. (End is less than or equal to begin)
+    D3D12_RANGE readRange = {};
+    readRange.Begin = 0;
+    readRange.End = 0;
+
+    m_buffer->Map(0, &readRange, reinterpret_cast<void**>(&m_data));
   }
 
-  void Buffer::Destroy()
+  void UploadBuffer::Destroy()
   {
-    if (m_resource)
+    if (m_buffer)
     {
-      m_resource->Release();
-      m_resource = nullptr;
+      m_buffer->Release();
+      m_buffer = nullptr;
     }
   }
 
-  void Buffer::AllocBuffer(void* bufferData, UINT size)
+  void UploadBuffer::AllocBuffer(void* bufferData, UINT size)
   {
+    D3D12_RANGE readRange = {};
+    readRange.Begin = 0;
+    readRange.End = 0;
+
     memcpy(m_data, bufferData, size);
-    m_resource->Unmap(0, nullptr);
+    m_buffer->Unmap(0, &readRange);
   }
 }

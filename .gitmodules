@@ -10,3 +10,7 @@
 	path = Dependency/D3D12MemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator.git
 	branch = master
+[submodule "Dependency/D3DX12"]
+	path = Dependency/D3DX12
+	url = git@github.com:Osman-Fatih-Cakir/D3DX12.git
+	branch = master

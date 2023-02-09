@@ -37,8 +37,10 @@ namespace WoohooDX12
 	{
 		InitAPI();
 		InitResources();
-		SetupCommands();
+		SetupRenderCommands();
 		m_timeStart = std::chrono::high_resolution_clock::now();
+
+		UploadResourcesToGPU();
 	}
 
 	void Renderer::UnInit()
@@ -101,12 +103,12 @@ namespace WoohooDX12
 
 			m_ubo.modelMatrix *= DirectX::XMMatrixRotationAxis(DirectX::XMLoadFloat3(&UpVector), DirectX::XMConvertToRadians(1.0f));
 
-			m_uniformBuffer->AllocBuffer(&m_ubo, sizeof(uboVS));
+			// TODO rotate the triangle
 		}
 
 		// Record all the commands we need to render the scene into the command
 		// list.
-		SetupCommands();
+		SetupRenderCommands();
 
 		// Execute the command list.
 		ID3D12CommandList* ppCommandLists[] = { m_commandList };
@@ -183,15 +185,19 @@ namespace WoohooDX12
 		ThrowIfFailed(m_device->QueryInterface(&m_debugDevice));
 #endif
 
-		// Create command queue
-		D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-		queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-		queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+		// TODO create a command queue class
 
-		ThrowIfFailed(m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
+		{
+			// Create command queue
+			D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+			queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+			queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
-		// Create command allocator
-		ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator)));
+			ThrowIfFailed(m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
+
+			// Create command allocator
+			ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator)));
+		}
 
 		// Sync
 		ThrowIfFailed(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
@@ -243,7 +249,6 @@ namespace WoohooDX12
 			rootSignatureDesc.Desc_1_1.NumStaticSamplers = 0;
 			rootSignatureDesc.Desc_1_1.pStaticSamplers = nullptr;
 
-
 			ID3DBlob* signature;
 			ID3DBlob* error;
 			try
@@ -288,13 +293,11 @@ namespace WoohooDX12
 				// Heap usage. An upload heap is used here for code simplicity and
 				// because there are very few vertices to actually transfer.
 
-				m_uniformBuffer = new UploadBuffer();
-				m_uniformBuffer->Create(m_device, (sizeof(uboVS) + 255) & ~255, 1, "Constant Buffer Upload Heap");
-				m_uniformBuffer->AllocBuffer(&m_ubo, sizeof(uboVS));
-
 				D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-				cbvDesc.BufferLocation = m_uniformBuffer->m_buffer->GetGPUVirtualAddress();
-				cbvDesc.SizeInBytes = (sizeof(uboVS) + 255) & ~255; // CB size is required to be 256-byte aligned
+
+				m_uniformBuffer = new StaticBufferHeap();
+				m_uniformBuffer->Create(m_device, true, BufferType::BT_ConstantBuffer, (sizeof(uboVS) + 255) & ~255, "Constant Buffer Default Heap");
+				m_uniformBuffer->AllocConstantBuffer(1, sizeof(uboVS), &m_ubo, &cbvDesc.BufferLocation, &cbvDesc.SizeInBytes);
 
 				D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
 				heapDesc.NumDescriptors = 1;
@@ -396,7 +399,7 @@ namespace WoohooDX12
 
 		// Create vertex buffer
 		{
-			const UINT vertexBufferSize = sizeof(m_vertexBufferData);
+			const uint32 vertexBufferSize = AlignOffset((uint32)sizeof(m_vertexBufferData), MEMORY_ALIGNMENT);
 
 			// NOTE: Using upload heaps to transfer static data like vertex buffers is
 			// not recommended. Every time the GPU needs it, the upload heap will be
@@ -404,20 +407,14 @@ namespace WoohooDX12
 			// is used here for code simplicity and because there are very few vertices
 			// to actually transfer.
 
-
-			m_vertexBuffer = new UploadBuffer();
-			m_vertexBuffer->Create(m_device, vertexBufferSize, 1, "Vertex Buffer Upload Heap");
-			m_vertexBuffer->AllocBuffer((void*)&m_vertexBufferData, vertexBufferSize);
-
-			// Initialize the vertex buffer view.
-			m_vertexBufferView.BufferLocation = m_vertexBuffer->m_buffer->GetGPUVirtualAddress();
-			m_vertexBufferView.StrideInBytes = sizeof(Vertex);
-			m_vertexBufferView.SizeInBytes = vertexBufferSize;
+			m_vertexBuffer = new StaticBufferHeap();
+			m_vertexBuffer->Create(m_device, true, BufferType::BT_VertexBuffer, vertexBufferSize, "Vertex Buffer Default Heap");
+			m_vertexBuffer->AllocVertexBuffer(3, sizeof(Vertex), (void*)&m_vertexBufferData, &m_vertexBufferView);
 		}
 
 		// Create index buffer
 		{
-			const UINT indexBufferSize = sizeof(m_indexBufferData);
+			const uint32 indexBufferSize = AlignOffset((uint32)sizeof(m_indexBufferData), MEMORY_ALIGNMENT);
 
 			// NOTE: Using upload heaps to transfer static data like vertex buffers is
 			// not recommended. Every time the GPU needs it, the upload heap will be
@@ -425,14 +422,9 @@ namespace WoohooDX12
 			// is used here for code simplicity and because there are very few vertices
 			// to actually transfer.
 
-			m_indexBuffer = new UploadBuffer();
-			m_indexBuffer->Create(m_device, indexBufferSize, 1, "Index Buffer Upload Heap");
-			m_indexBuffer->AllocBuffer((void*)&m_indexBufferData, indexBufferSize);
-
-			// Initialize the index buffer view.
-			m_indexBufferView.BufferLocation = m_indexBuffer->m_buffer->GetGPUVirtualAddress();
-			m_indexBufferView.Format = DXGI_FORMAT_R32_UINT;
-			m_indexBufferView.SizeInBytes = indexBufferSize;
+			m_indexBuffer = new StaticBufferHeap();
+			m_indexBuffer->Create(m_device, true, BufferType::BT_IndexBuffer, indexBufferSize, "Index Buffer Default Heap");
+			m_indexBuffer->AllocIndexBuffer(3, 1 * sizeof(uint32), (void*)&m_indexBufferData, &m_indexBufferView);
 		}
 
 		// Create synchronization objects and wait until assets have been uploaded to the GPU.
@@ -467,7 +459,7 @@ namespace WoohooDX12
 		Log("API resources has been initialized.", LogType::LT_INFO);
 	}
 
-	void Renderer::SetupCommands()
+	void Renderer::SetupRenderCommands()
 	{
 		// Command list allocators can only be reset when the associated
 		// command lists have finished execution on the GPU; apps should use
@@ -596,6 +588,9 @@ namespace WoohooDX12
 		vsOut.write((const char*)(*vertexShader)->GetBufferPointer(), (*vertexShader)->GetBufferSize());
 		fsOut.write((const char*)(*pixelShader)->GetBufferPointer(), (*pixelShader)->GetBufferSize());
 
+		vsOut.close();
+		fsOut.close();
+
 		Log("Done: Compiling shaders.", LogType::LT_INFO);
 	}
 
@@ -604,6 +599,77 @@ namespace WoohooDX12
 		// Create the command list.
 		ThrowIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator, m_pipelineState, IID_PPV_ARGS(&m_commandList)));
 		m_commandList->SetName(L"Main Command List");
+	}
+
+	void Renderer::UploadResourcesToGPU()
+	{
+		ThrowIfFailed(m_commandAllocator->Reset());
+		ThrowIfFailed(m_commandList->Reset(m_commandAllocator, m_pipelineState));
+
+		// Upload uniform buffer data to video memory
+		{
+			m_uniformBuffer->UploadData(m_commandList);
+
+			ThrowIfFailed(m_commandList->Close());
+			ID3D12CommandList* ppCommandLists[] = { m_commandList };
+			m_commandQueue->ExecuteCommandLists(1, ppCommandLists);
+			m_commandQueue->Signal(m_fence, m_fenceValue);
+
+			if (m_fence->GetCompletedValue() < m_fenceValue)
+			{
+				m_fence->SetEventOnCompletion(m_fenceValue, m_fenceEvent);
+				WaitForSingleObject(m_fenceEvent, INFINITE);
+			}
+
+			++m_fenceValue;
+
+			ThrowIfFailed(m_commandAllocator->Reset());
+			ThrowIfFailed(m_commandList->Reset(m_commandAllocator, m_pipelineState));
+		}
+
+		// Vertex uniform buffer data to video memory
+		{
+			m_vertexBuffer->UploadData(m_commandList);
+
+			ThrowIfFailed(m_commandList->Close());
+			ID3D12CommandList* ppCommandLists[] = { m_commandList };
+			m_commandQueue->ExecuteCommandLists(1, ppCommandLists);
+			m_commandQueue->Signal(m_fence, m_fenceValue);
+
+			if (m_fence->GetCompletedValue() < m_fenceValue)
+			{
+				m_fence->SetEventOnCompletion(m_fenceValue, m_fenceEvent);
+				WaitForSingleObject(m_fenceEvent, INFINITE);
+			}
+
+			++m_fenceValue;
+
+			ThrowIfFailed(m_commandAllocator->Reset());
+			ThrowIfFailed(m_commandList->Reset(m_commandAllocator, m_pipelineState));
+		}
+
+		// Index uniform buffer data to video memory
+		{
+			m_indexBuffer->UploadData(m_commandList);
+
+			ThrowIfFailed(m_commandList->Close());
+			ID3D12CommandList* ppCommandLists[] = { m_commandList };
+			m_commandQueue->ExecuteCommandLists(1, ppCommandLists);
+			m_commandQueue->Signal(m_fence, m_fenceValue);
+
+			if (m_fence->GetCompletedValue() < m_fenceValue)
+			{
+				m_fence->SetEventOnCompletion(m_fenceValue, m_fenceEvent);
+				WaitForSingleObject(m_fenceEvent, INFINITE);
+			}
+
+			++m_fenceValue;
+
+			ThrowIfFailed(m_commandAllocator->Reset());
+			ThrowIfFailed(m_commandList->Reset(m_commandAllocator, m_pipelineState));
+		}
+
+		ThrowIfFailed(m_commandList->Close());
 	}
 
 	void Renderer::SetupSwapchain(UINT width, UINT height)
@@ -647,9 +713,9 @@ namespace WoohooDX12
 			{
 				m_swapchain = (IDXGISwapChain3*)swapchain;
 			}
-	}
+		}
 		m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
-}
+	}
 
 	void Renderer::DestroyCommands()
 	{

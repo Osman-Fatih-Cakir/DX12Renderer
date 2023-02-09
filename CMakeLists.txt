@@ -14,7 +14,6 @@ set_property(TARGET DX12Renderer PROPERTY C_STANDARD 17)
 set_property(TARGET DX12Renderer PROPERTY CXX_STANDARD 17)
 target_include_directories(DX12Renderer PUBLIC "${CMAKE_SOURCE_DIR}/Dependency/CrossWindow/src")
 
-
 target_link_libraries(
     DX12Renderer
     CrossWindow
@@ -29,5 +28,9 @@ target_link_libraries(
 target_include_directories(DX12Renderer PUBLIC "${CMAKE_SOURCE_DIR}/Dependency/CrossWindow-Graphics/src")
 
 add_subdirectory(Dependency/D3D12MemoryAllocator)
+
+
 target_link_libraries(DX12Renderer D3D12MemoryAllocator)
 target_include_directories(DX12Renderer PUBLIC "${CMAKE_SOURCE_DIR}/Dependency/D3D12MemoryAllocator/include")
+
+target_include_directories(DX12Renderer PUBLIC "${CMAKE_SOURCE_DIR}/Dependency/D3DX12")

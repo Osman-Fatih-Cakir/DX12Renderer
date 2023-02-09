@@ -1,5 +1,7 @@
 #pragma once
 
+#define DX12DEBUG
+
 #include <d3d12.h>
 #include <dxgi1_3.h>
 #include <dxgi1_4.h>
@@ -43,11 +45,12 @@ namespace WoohooDX12
   protected:
     void InitAPI();
     void InitResources();
-    void SetupCommands();
+    void SetupRenderCommands();
     void InitFrameBuffer();
     void CompileShaders(ID3DBlob** vertexShader, ID3DBlob** fragmentShader);
     void CreateCommands();
 
+    void UploadResourcesToGPU();
     void SetupSwapchain(UINT width, UINT height);
 
     void DestroyAPI();
@@ -63,7 +66,7 @@ namespace WoohooDX12
       {{-0.5f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}
     };
 
-    constexpr static uint32_t m_indexBufferData[3] = { 0, 1, 2 };
+    constexpr static UINT m_indexBufferData[3] = { 0, 1, 2 };
     static const UINT m_backbufferCount = 2;
 
     AppWindow* m_window = nullptr;
@@ -98,10 +101,10 @@ namespace WoohooDX12
     D3D12_VIEWPORT m_viewport;
     D3D12_RECT m_surfaceSize;
 
-    UploadBuffer* m_vertexBuffer = nullptr;
-    UploadBuffer* m_indexBuffer = nullptr;
+    StaticBufferHeap* m_vertexBuffer = nullptr;
+    StaticBufferHeap* m_indexBuffer = nullptr;
 
-    UploadBuffer* m_uniformBuffer = nullptr;
+    StaticBufferHeap* m_uniformBuffer = nullptr;
     ID3D12DescriptorHeap* m_uniformBufferHeap = nullptr;
     UINT8* m_mappedUniformBuffer = nullptr;
 

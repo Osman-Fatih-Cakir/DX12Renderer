@@ -199,18 +199,6 @@ namespace WoohooDX12
 			ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator)));
 		}
 
-		{
-			// Create copy command queue
-			D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-			queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-			queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-
-			ThrowIfFailed(m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_copyCommandQueue)));
-
-			// Create command allocator
-			ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_copyCommandAllocator)));
-		}
-
 		// Sync
 		ThrowIfFailed(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
 
@@ -408,7 +396,6 @@ namespace WoohooDX12
 
 		// Command lists are created in the recording state, but there is nothing to record yet. The main loop expects it to be closed, so close it now.
 		ThrowIfFailed(m_commandList->Close());
-		ThrowIfFailed(m_copyCommandList->Close());
 
 		// Create vertex buffer
 		{
@@ -612,25 +599,21 @@ namespace WoohooDX12
 		// Create the command list.
 		ThrowIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_commandAllocator, m_pipelineState, IID_PPV_ARGS(&m_commandList)));
 		m_commandList->SetName(L"Main Command List");
-
-		// Create copy command list
-		ThrowIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_copyCommandAllocator, m_pipelineState, IID_PPV_ARGS(&m_copyCommandList)));
-		m_commandList->SetName(L"Copy Command List");
 	}
 
 	void Renderer::UploadResourcesToGPU()
 	{
-		ThrowIfFailed(m_copyCommandAllocator->Reset());
-		ThrowIfFailed(m_copyCommandList->Reset(m_copyCommandAllocator, m_pipelineState));
+		ThrowIfFailed(m_commandAllocator->Reset());
+		ThrowIfFailed(m_commandList->Reset(m_commandAllocator, m_pipelineState));
 
 		// Upload uniform buffer data to video memory
 		{
-			m_uniformBuffer->UploadData(m_copyCommandList);
+			m_uniformBuffer->UploadData(m_commandList);
 
-			ThrowIfFailed(m_copyCommandList->Close());
-			ID3D12CommandList* ppCommandLists[] = { m_copyCommandList };
-			m_copyCommandQueue->ExecuteCommandLists(1, ppCommandLists);
-			m_copyCommandQueue->Signal(m_fence, m_fenceValue);
+			ThrowIfFailed(m_commandList->Close());
+			ID3D12CommandList* ppCommandLists[] = { m_commandList };
+			m_commandQueue->ExecuteCommandLists(1, ppCommandLists);
+			m_commandQueue->Signal(m_fence, m_fenceValue);
 
 			if (m_fence->GetCompletedValue() < m_fenceValue)
 			{
@@ -640,18 +623,18 @@ namespace WoohooDX12
 
 			++m_fenceValue;
 
-			ThrowIfFailed(m_copyCommandAllocator->Reset());
-			ThrowIfFailed(m_copyCommandList->Reset(m_copyCommandAllocator, m_pipelineState));
+			ThrowIfFailed(m_commandAllocator->Reset());
+			ThrowIfFailed(m_commandList->Reset(m_commandAllocator, m_pipelineState));
 		}
 
 		// Vertex uniform buffer data to video memory
 		{
-			m_vertexBuffer->UploadData(m_copyCommandList);
+			m_vertexBuffer->UploadData(m_commandList);
 
-			ThrowIfFailed(m_copyCommandList->Close());
-			ID3D12CommandList* ppCommandLists[] = { m_copyCommandList };
-			m_copyCommandQueue->ExecuteCommandLists(1, ppCommandLists);
-			m_copyCommandQueue->Signal(m_fence, m_fenceValue);
+			ThrowIfFailed(m_commandList->Close());
+			ID3D12CommandList* ppCommandLists[] = { m_commandList };
+			m_commandQueue->ExecuteCommandLists(1, ppCommandLists);
+			m_commandQueue->Signal(m_fence, m_fenceValue);
 
 			if (m_fence->GetCompletedValue() < m_fenceValue)
 			{
@@ -661,18 +644,18 @@ namespace WoohooDX12
 
 			++m_fenceValue;
 
-			ThrowIfFailed(m_copyCommandAllocator->Reset());
-			ThrowIfFailed(m_copyCommandList->Reset(m_copyCommandAllocator, m_pipelineState));
+			ThrowIfFailed(m_commandAllocator->Reset());
+			ThrowIfFailed(m_commandList->Reset(m_commandAllocator, m_pipelineState));
 		}
 
 		// Index uniform buffer data to video memory
 		{
-			m_indexBuffer->UploadData(m_copyCommandList);
+			m_indexBuffer->UploadData(m_commandList);
 
-			ThrowIfFailed(m_copyCommandList->Close());
-			ID3D12CommandList* ppCommandLists[] = { m_copyCommandList };
-			m_copyCommandQueue->ExecuteCommandLists(1, ppCommandLists);
-			m_copyCommandQueue->Signal(m_fence, m_fenceValue);
+			ThrowIfFailed(m_commandList->Close());
+			ID3D12CommandList* ppCommandLists[] = { m_commandList };
+			m_commandQueue->ExecuteCommandLists(1, ppCommandLists);
+			m_commandQueue->Signal(m_fence, m_fenceValue);
 
 			if (m_fence->GetCompletedValue() < m_fenceValue)
 			{
@@ -682,11 +665,11 @@ namespace WoohooDX12
 
 			++m_fenceValue;
 
-			ThrowIfFailed(m_copyCommandAllocator->Reset());
-			ThrowIfFailed(m_copyCommandList->Reset(m_copyCommandAllocator, m_pipelineState));
+			ThrowIfFailed(m_commandAllocator->Reset());
+			ThrowIfFailed(m_commandList->Reset(m_commandAllocator, m_pipelineState));
 		}
 
-		ThrowIfFailed(m_copyCommandList->Close());
+		ThrowIfFailed(m_commandList->Close());
 	}
 
 	void Renderer::SetupSwapchain(UINT width, UINT height)

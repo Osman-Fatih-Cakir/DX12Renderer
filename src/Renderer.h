@@ -1,6 +1,6 @@
 #pragma once
 
-#undef DX12DEBUG
+#define DX12DEBUG
 
 #include <d3d12.h>
 #include <dxgi1_3.h>
@@ -87,10 +87,6 @@ namespace WoohooDX12
     ID3D12CommandQueue* m_commandQueue = nullptr;
     ID3D12CommandAllocator* m_commandAllocator = nullptr;
     ID3D12GraphicsCommandList* m_commandList = nullptr;
-
-    ID3D12CommandQueue* m_copyCommandQueue = nullptr;
-    ID3D12CommandAllocator* m_copyCommandAllocator = nullptr;
-    ID3D12GraphicsCommandList* m_copyCommandList = nullptr;
 
     // Current Frame
     UINT m_currentBuffer = 0;

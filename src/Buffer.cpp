@@ -149,4 +149,24 @@ namespace WoohooDX12
       m_memInit = m_memOffset;
     }
   }
+
+  // Used by upload heaps only
+  void StaticBufferHeap::UpdateBuffer(void* buffer, size_t sizeOfBuffer)
+  {
+    if (m_useVideoMem)
+    {
+      Log("Can not update gpu memory buffer", LogType::LT_WARNING);
+      return;
+    }
+
+    // Update upload heap for constant buffer
+    D3D12_RANGE readRange;
+    readRange.Begin = 0;
+    readRange.End = 0;
+
+    uint32* ptr = nullptr;
+    ThrowIfFailed(m_uploadMemBuffer->Map(0, &readRange, reinterpret_cast<void**>(&ptr)));
+    memcpy(ptr, buffer, sizeOfBuffer);
+    m_uploadMemBuffer->Unmap(0, &readRange);
+  }
 }

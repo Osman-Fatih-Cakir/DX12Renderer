@@ -18,6 +18,8 @@ namespace WoohooDX12
 		bool AllocConstantBuffer(uint32 numOfElements, uint32 strideInBytes, void* bufferData, D3D12_GPU_VIRTUAL_ADDRESS* bufferLocationOut, uint32* sizeOut);
 
 		void UploadData(ID3D12GraphicsCommandList* cmdList);
+		
+		void UpdateBuffer(void* buffer, size_t sizeOfBuffer);
 
 		const uint32* GetMemorySize();
 

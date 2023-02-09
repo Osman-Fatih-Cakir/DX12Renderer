@@ -103,7 +103,8 @@ namespace WoohooDX12
 
 			m_ubo.modelMatrix *= DirectX::XMMatrixRotationAxis(DirectX::XMLoadFloat3(&UpVector), DirectX::XMConvertToRadians(1.0f));
 
-			// TODO rotate the triangle
+			// Update upload heap
+			m_uniformBuffer->UpdateBuffer(&m_ubo, sizeof(uboVS));
 		}
 
 		// Record all the commands we need to render the scene into the command
@@ -296,7 +297,7 @@ namespace WoohooDX12
 				D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
 
 				m_uniformBuffer = new StaticBufferHeap();
-				m_uniformBuffer->Create(m_device, true, BufferType::BT_ConstantBuffer, (sizeof(uboVS) + 255) & ~255, "Constant Buffer Default Heap");
+				m_uniformBuffer->Create(m_device, false, BufferType::BT_ConstantBuffer, (sizeof(uboVS) + 255) & ~255, "Constant Buffer Default Heap");
 				m_uniformBuffer->AllocConstantBuffer(1, sizeof(uboVS), &m_ubo, &cbvDesc.BufferLocation, &cbvDesc.SizeInBytes);
 
 				D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
@@ -605,27 +606,6 @@ namespace WoohooDX12
 	{
 		ThrowIfFailed(m_commandAllocator->Reset());
 		ThrowIfFailed(m_commandList->Reset(m_commandAllocator, m_pipelineState));
-
-		// Upload uniform buffer data to video memory
-		{
-			m_uniformBuffer->UploadData(m_commandList);
-
-			ThrowIfFailed(m_commandList->Close());
-			ID3D12CommandList* ppCommandLists[] = { m_commandList };
-			m_commandQueue->ExecuteCommandLists(1, ppCommandLists);
-			m_commandQueue->Signal(m_fence, m_fenceValue);
-
-			if (m_fence->GetCompletedValue() < m_fenceValue)
-			{
-				m_fence->SetEventOnCompletion(m_fenceValue, m_fenceEvent);
-				WaitForSingleObject(m_fenceEvent, INFINITE);
-			}
-
-			++m_fenceValue;
-
-			ThrowIfFailed(m_commandAllocator->Reset());
-			ThrowIfFailed(m_commandList->Reset(m_commandAllocator, m_pipelineState));
-		}
 
 		// Vertex uniform buffer data to video memory
 		{

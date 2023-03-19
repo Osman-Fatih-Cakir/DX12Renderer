@@ -7,6 +7,9 @@
 #include "RendererUtils.h"
 #include "CrossWindow/Graphics.h"
 #include "Math.h"
+#include "Camera.h"
+#include <locale>
+#include <codecvt>
 //#include "D3D12MemAlloc.h"
 
 
@@ -102,6 +105,8 @@ namespace WoohooDX12
 			m_elapsedTime = fmodf(m_elapsedTime, 6.283185307179586f);
 
 			m_ubo.modelMatrix *= DirectX::XMMatrixRotationAxis(DirectX::XMLoadFloat3(&UpVector), DirectX::XMConvertToRadians(1.0f));
+   m_ubo.viewMatrix = m_cam->CalculateViewMat();
+   m_ubo.projectionMatrix = m_cam->CalculateProjMat();
 
 			// Update upload heap
 			m_uniformBuffer->UpdateBuffer(&m_ubo, sizeof(uboVS));
@@ -568,7 +573,12 @@ namespace WoohooDX12
 		std::wstring fragCompiledPath = GetShaderPath(true) + L"triangle.frag.dxbc";
 
 		std::wstring vertPath = GetShaderPath(false) + L"triangle.vert.hlsl";
-		std::wstring fragPath = GetShaderPath(false) + L"triangle.frag.hlsl";
+    std::wstring fragPath         = GetShaderPath(false) + L"triangle.frag.hlsl";
+		
+		using convert_type            = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+		std::string path                   = converter.to_bytes(GetShaderPath(false));
+		Log(path, LogType::LT_TEXT);
 
 		try
 		{

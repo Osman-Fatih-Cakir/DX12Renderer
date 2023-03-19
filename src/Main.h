@@ -18,4 +18,6 @@ namespace WoohooDX12
     Renderer* m_renderer = nullptr;
     bool m_quit = false;
   };
+
+  extern Main* m_app;
 }

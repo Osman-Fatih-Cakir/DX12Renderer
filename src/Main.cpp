@@ -2,20 +2,18 @@
 #include <cassert>
 #include "Utils.h"
 
-extern bool g_windowShouldClose;
-
 #include <windows.h>
 #include <memory>
 
-bool g_windowShouldClose = false;
+WoohooDX12::Main* WoohooDX12::m_app = nullptr;
 
 void WINAPI xmain(int argc, const char** argv)
 {
-  while (!g_windowShouldClose)
+  WoohooDX12::m_app = new WoohooDX12::Main;
+  while (!WoohooDX12::m_app->m_quit)
   {
-    WoohooDX12::Main main;
-    main.Init();
-    main.Run();
+    WoohooDX12::m_app->Init();
+    WoohooDX12::m_app->Run();
   }
 }
 
@@ -47,36 +45,11 @@ namespace WoohooDX12
 
   void Main::Run()
   {
-    m_quit = false;
     while (!m_quit)
     {
-      bool shouldRender = true;
+      m_window->HandleEvents();
 
-      m_window->m_eventQueue->update();
-
-      while (!m_window->m_eventQueue->empty())
-      {
-        const xwin::Event& event = m_window->m_eventQueue->front();
-
-        if (event.type == xwin::EventType::Resize)
-        {
-          const xwin::ResizeData data = event.data.resize;
-          m_renderer->Resize(data.width, data.height);
-          shouldRender = false;
-        }
-
-        if (event.type == xwin::EventType::Close)
-        {
-          m_window->CloseAppWindow();
-          shouldRender = false;
-          m_quit = true;
-          g_windowShouldClose = true;
-        }
-
-        m_window->m_eventQueue->pop();
-      }
-
-      if (shouldRender)
+      if (m_window->ShouldRender())
       {
         m_renderer->Render();
       }

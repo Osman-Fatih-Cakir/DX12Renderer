@@ -46,7 +46,10 @@ inline void Log(const String& str, LogType logType = LogType::LT_LOG)
 
 inline std::wstring GetWorkspacePath()
 {
-  return fs::current_path().wstring() + L"\\..\\Workspace\\";
+  wchar_t szExeFile[MAX_PATH];
+  GetModuleFileNameW(NULL, szExeFile, MAX_PATH);
+  std::wstring path(szExeFile);
+  return path + L"\\..\\..\\..\\Workspace\\";
 }
 
 inline std::wstring GetShaderPath(bool isBinary)

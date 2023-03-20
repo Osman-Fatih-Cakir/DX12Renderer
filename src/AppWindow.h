@@ -6,7 +6,7 @@ namespace WoohooDX12
 {
   class AppWindow
   {
-  public:
+   public:
     int CreateAppWindow(int width, int height);
     void HandleEvents();
     bool ShouldRender();
@@ -14,13 +14,14 @@ namespace WoohooDX12
 
     xwin::WindowDesc GetDesc();
 
-    private:
+   private:
     bool shouldRender = true;
-  public:
-    int m_width = 640;
-    int m_height = 640;
 
-    xwin::Window* m_window = nullptr;
+   public:
+    int m_width                    = 640;
+    int m_height                   = 640;
+
+    xwin::Window* m_window         = nullptr;
     xwin::EventQueue* m_eventQueue = nullptr;
   };
 
@@ -35,4 +36,4 @@ namespace WoohooDX12
 
   extern bool isRightClicked, buttonPressed[4];
   extern double frameDelta;
-}
+} // namespace WoohooDX12

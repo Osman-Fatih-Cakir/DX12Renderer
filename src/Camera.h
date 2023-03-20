@@ -14,8 +14,7 @@ namespace WoohooDX12
     Mat viewMat, projMat;
     // Fov is in angle
     unsigned short fov = 45.0f, viewWidth = 1920.0f, viewHeight = 1080.0f;
-    float nearPlane = CONST_CAMNEAR, farPlane = CONST_CAMFAR,
-          mouseSensitivity = 0.001f, mouseYaw = 90.0f, mousePitch = 0.0f;
+    float nearPlane = CONST_CAMNEAR, farPlane = CONST_CAMFAR, mouseSensitivity = 0.001f, mouseYaw = 90.0f, mousePitch = 0.0f;
 
    public:
     Camera(Vec3 target = Vec3(0, 0, 1));
@@ -25,10 +24,7 @@ namespace WoohooDX12
     Mat CalculateViewMat();
 
     // Setters
-    void SetProperties(unsigned short fov_in_Angle,
-                       float aspect_Width,
-                       float aspect_Height,
-                       float sensitivity);
+    void SetProperties(unsigned short fov_in_Angle, float aspect_Width, float aspect_Height, float sensitivity);
     void TakeInputs(float mouseOffsetX, float mouseOffsetY);
   };
 

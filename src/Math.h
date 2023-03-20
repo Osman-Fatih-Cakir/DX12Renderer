@@ -1,15 +1,16 @@
 #pragma once
 
-#include <DirectXMath.h>
 #include "Types.h"
 
-constexpr Vec3 ZeroVector = Vec3(0, 0, 0);
-constexpr Vec3 UpVector = Vec3(0, 1, 0);
-constexpr Vec3 RightVector = Vec3(1, 0, 0);
+#include <DirectXMath.h>
+
+constexpr Vec3 ZeroVector    = Vec3(0, 0, 0);
+constexpr Vec3 UpVector      = Vec3(0, 1, 0);
+constexpr Vec3 RightVector   = Vec3(1, 0, 0);
 constexpr Vec3 ForwardVector = Vec3(0, 0, 1);
-constexpr Vec3 LeftVector = Vec3(-1, 0, 0);
-constexpr Vec3 BackVector = Vec3(0, 0, -1);
-constexpr Vec3 DownVector = Vec3(0, -1, 0);
+constexpr Vec3 LeftVector    = Vec3(-1, 0, 0);
+constexpr Vec3 BackVector    = Vec3(0, 0, -1);
+constexpr Vec3 DownVector    = Vec3(0, -1, 0);
 
 inline void MakeIdentity(Mat4& mat)
 {
@@ -31,7 +32,4 @@ inline void MakeIdentity(Mat4& mat)
   mat._44 = 1.0f;
 }
 
-inline void MakeIdentity(Mat& mat)
-{
-  mat = DirectX::XMMatrixIdentity();
-}
+inline void MakeIdentity(Mat& mat) { mat = DirectX::XMMatrixIdentity(); }

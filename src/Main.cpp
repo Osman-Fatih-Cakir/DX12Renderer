@@ -1,8 +1,10 @@
 #include "Main.h"
-#include <cassert>
+
 #include "Utils.h"
 
 #include <windows.h>
+
+#include <cassert>
 #include <memory>
 
 WoohooDX12::Main* WoohooDX12::m_app = nullptr;
@@ -17,12 +19,11 @@ void WINAPI xmain(int argc, const char** argv)
   }
 }
 
-
 namespace WoohooDX12
 {
   Main::Main()
   {
-    m_window = new AppWindow();
+    m_window   = new AppWindow();
     m_renderer = new Renderer(m_window);
 
     system(" "); // Get the ascii color codes to work
@@ -55,4 +56,4 @@ namespace WoohooDX12
       }
     }
   }
-}
+} // namespace WoohooDX12

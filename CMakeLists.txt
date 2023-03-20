@@ -13,6 +13,10 @@ set(XGFX_API "DIRECTX12")
 set_property(TARGET DX12Renderer PROPERTY C_STANDARD 17)
 set_property(TARGET DX12Renderer PROPERTY CXX_STANDARD 17)
 target_include_directories(DX12Renderer PUBLIC "${CMAKE_SOURCE_DIR}/Dependency/CrossWindow/src")
+if(MSVC)
+    target_compile_options(DX12Renderer PUBLIC "/ZI")
+    target_link_options(DX12Renderer PUBLIC "/INCREMENTAL")
+endif()
 
 target_link_libraries(
     DX12Renderer

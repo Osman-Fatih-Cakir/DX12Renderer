@@ -7,15 +7,17 @@ namespace WoohooDX12
 {
   class Main
   {
-  public:
+   public:
     Main();
     ~Main();
     void Init();
     void Run();
 
-  public:
-    AppWindow* m_window = nullptr;
+   public:
+    AppWindow* m_window  = nullptr;
     Renderer* m_renderer = nullptr;
-    bool m_quit = false;
+    bool m_quit          = false;
   };
-}
+
+  extern Main* m_app;
+} // namespace WoohooDX12

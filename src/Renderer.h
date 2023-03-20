@@ -2,15 +2,17 @@
 
 #define DX12DEBUG
 
+#include "AppWindow.h"
+#include "Buffer.h"
+#include "Types.h"
+#include "Utils.h"
+
 #include <d3d12.h>
+#include <d3dcompiler.h>
 #include <dxgi1_3.h>
 #include <dxgi1_4.h>
-#include <d3dcompiler.h>
+
 #include <chrono>
-#include "Utils.h"
-#include "AppWindow.h"
-#include "Types.h"
-#include "Buffer.h"
 
 namespace WoohooDX12
 {
@@ -31,7 +33,7 @@ namespace WoohooDX12
 
   class Renderer
   {
-  public:
+   public:
     Renderer(AppWindow* window);
     ~Renderer();
 
@@ -42,7 +44,7 @@ namespace WoohooDX12
 
     void Render();
 
-  protected:
+   protected:
     void InitAPI();
     void InitResources();
     void SetupRenderCommands();
@@ -58,18 +60,17 @@ namespace WoohooDX12
     void DestroyCommands();
     void DestroyFrameBuffer();
 
-  public:
-    constexpr static Vertex m_vertexBufferData[3] =
-    {
-      {{0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-      {{0.5f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-      {{-0.5f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}
+   public:
+    constexpr static Vertex m_vertexBufferData[3] = {
+        {{0.0f, 1.0f, 0.0f},  {1.0f, 0.0f, 0.0f}},
+        {{0.5f, 0.0f, 0.0f},  {0.0f, 1.0f, 0.0f}},
+        {{-0.5f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}
     };
 
-    constexpr static UINT m_indexBufferData[3] = { 0, 1, 2 };
-    static const UINT m_backbufferCount = 2;
+    constexpr static UINT m_indexBufferData[3] = {0, 1, 2};
+    static const UINT m_backbufferCount        = 2;
 
-    AppWindow* m_window = nullptr;
+    AppWindow* m_window                        = nullptr;
 
     std::chrono::time_point<std::chrono::steady_clock> m_timeStart, m_timeEnd;
     float m_elapsedTime = 0.0f;
@@ -79,34 +80,34 @@ namespace WoohooDX12
     IDXGIFactory4* m_factory = nullptr;
     IDXGIAdapter1* m_adapter = nullptr;
 #ifdef DX12DEBUG
-    ID3D12Debug1* m_debugController = nullptr;
+    ID3D12Debug1* m_debugController  = nullptr;
     ID3D12DebugDevice* m_debugDevice = nullptr;
 #endif
 
-    ID3D12Device* m_device = nullptr;
-    ID3D12CommandQueue* m_commandQueue = nullptr;
+    ID3D12Device* m_device                     = nullptr;
+    ID3D12CommandQueue* m_commandQueue         = nullptr;
     ID3D12CommandAllocator* m_commandAllocator = nullptr;
-    ID3D12GraphicsCommandList* m_commandList = nullptr;
+    ID3D12GraphicsCommandList* m_commandList   = nullptr;
 
     // Current Frame
-    UINT m_currentBuffer = 0;
-    ID3D12DescriptorHeap* m_rtvHeap = nullptr;
+    UINT m_currentBuffer                       = 0;
+    ID3D12DescriptorHeap* m_rtvHeap            = nullptr;
     ID3D12Resource* m_renderTargets[m_backbufferCount];
     IDXGISwapChain3* m_swapchain = nullptr;
 
-    UINT m_width = 640;
-    UINT m_height = 480;
+    UINT m_width                 = 640;
+    UINT m_height                = 480;
 
     // Resources
     D3D12_VIEWPORT m_viewport;
     D3D12_RECT m_surfaceSize;
 
-    StaticBufferHeap* m_vertexBuffer = nullptr;
-    StaticBufferHeap* m_indexBuffer = nullptr;
+    StaticBufferHeap* m_vertexBuffer          = nullptr;
+    StaticBufferHeap* m_indexBuffer           = nullptr;
 
-    StaticBufferHeap* m_uniformBuffer = nullptr;
+    StaticBufferHeap* m_uniformBuffer         = nullptr;
     ID3D12DescriptorHeap* m_uniformBufferHeap = nullptr;
-    UINT8* m_mappedUniformBuffer = nullptr;
+    UINT8* m_mappedUniformBuffer              = nullptr;
 
     D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
     D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
